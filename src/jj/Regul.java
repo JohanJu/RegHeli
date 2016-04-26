@@ -1,5 +1,6 @@
 package jj;
 
+//2.8 3.4
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -17,11 +18,10 @@ public class Regul extends Thread implements ChangeListener {
 	private double umin = -10.0;
 	private double umax = 10.0;
 	private double starttime;
-	
+
 	private long time = 50;
 
 	private double power = 0;
-	
 
 	public Regul(OpCom opcom, int pri) {
 
@@ -45,11 +45,14 @@ public class Regul extends Thread implements ChangeListener {
 		starttime = System.currentTimeMillis();
 		try {
 			double mAng, mVel, mAcc;
+			double k = 1, td = 1;
 			while (true) {
-				mainOut.set(power);
 				mAng = mainIn.get();
 				mVel = AtV(mAng);
 				mAcc = VtA(mVel);
+				double e = 0 - mAng;
+				power = e*k+td*mVel;
+				mainOut.set(power);
 				sendDataToOpCom(mAng, mVel, mAcc);
 				Thread.sleep(time);
 			}
@@ -61,7 +64,7 @@ public class Regul extends Thread implements ChangeListener {
 	private double lastA;
 
 	private double AtV(double ang) {
-		double re = 100*(ang - lastA)/time;
+		double re = 100 * (ang - lastA) / time;
 		lastA = ang;
 		return re;
 	}
@@ -69,7 +72,7 @@ public class Regul extends Thread implements ChangeListener {
 	private double lastV;
 
 	private double VtA(double vel) {
-		double re = 100*(vel - lastV)/time;
+		double re = 100 * (vel - lastV) / time;
 		lastV = vel;
 		return re;
 	}
@@ -95,7 +98,8 @@ public class Regul extends Thread implements ChangeListener {
 	public void stateChanged(ChangeEvent e) {
 		Object source = e.getSource();
 		JSlider theJSlider = (JSlider) source;
-		power = theJSlider.getValue() / 5.0 - 10;
+		power = theJSlider.getValue() / 100.0;
+		System.out.println(power);
 
 	}
 }

@@ -85,9 +85,11 @@ public class OpCom {
 		
 		
 		slider = new JPanel();
-		JSlider js = new JSlider();
+		JSlider js = new JSlider(-1000,1000);
+		js.setMinorTickSpacing(1);
 		js.addChangeListener(regul);
 		js.setOrientation(1);
+		js.setSnapToTicks(false);
 		js.setPreferredSize(new Dimension(50,400));
 		slider.add(js);
 		
