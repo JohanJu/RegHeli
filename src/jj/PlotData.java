@@ -1,12 +1,13 @@
 package jj;
 
 public class PlotData implements Cloneable {
-	public double yref, y;
+	public double ang, vel, acc;
 	public double x; // holds the current time
 	
-	public PlotData(double xIn, double yrefIn, double yIn) {
-		yref = yrefIn;
-		y = yIn;
+	public PlotData(double xIn, double ang, double vel, double acc) {
+		this.ang = ang;
+		this.vel = vel;
+		this.acc = acc;
 		x = xIn;
 	}
 	

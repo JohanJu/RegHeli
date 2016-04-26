@@ -6,11 +6,13 @@ import java.awt.event.*;
 import se.lth.control.*;
 import se.lth.control.plot.*;
 
-/** Class that creates and maintains a GUI for the Ball and Beam process. 
-Uses two PlotterPanels for the plotters */
-public class OpCom {    
+/**
+ * Class that creates and maintains a GUI for the Ball and Beam process. Uses
+ * two PlotterPanels for the plotters
+ */
+public class OpCom {
 
-	public static final int OFF=0, BEAM=1, BALL=2;
+	public static final int OFF = 0, BEAM = 1, BALL = 2;
 	private static final double eps = 0.000001;
 
 	private Regul regul;
@@ -21,18 +23,18 @@ public class OpCom {
 	private JFrame frame;
 
 	// Declarartion of panels.
-	private BoxPanel guiPanel, plotterPanel, innerParPanel, outerParPanel, parPanel;
-	private JPanel innerParLabelPanel, innerParFieldPanel, outerParLabelPanel, outerParFieldPanel, buttonPanel, somePanel, leftPanel;
+	private BoxPanel guiPanel, plotterPanel, innerParPanel,  parPanel;
+	private JPanel innerParLabelPanel, innerParFieldPanel, buttonPanel,
+			somePanel, leftPanel,slider;
 	private PlotterPanel measPanel, ctrlPanel;
 
 	// Declaration of components.
-	private DoubleField innerParKField = new DoubleField(5,3);
-	private DoubleField innerParTiField = new DoubleField(5,3);
-	private DoubleField innerParTrField = new DoubleField(5,3);
-	private DoubleField innerParBetaField = new DoubleField(5,3);
-	private DoubleField innerParHField = new DoubleField(5,3);
+	private DoubleField innerParKField = new DoubleField(5, 3);
+	private DoubleField innerParTiField = new DoubleField(5, 3);
+	private DoubleField innerParTrField = new DoubleField(5, 3);
+	private DoubleField innerParBetaField = new DoubleField(5, 3);
+	private DoubleField innerParHField = new DoubleField(5, 3);
 	private JButton innerApplyButton;
-
 
 	private JRadioButton offModeButton;
 	private JRadioButton beamModeButton;
@@ -66,11 +68,11 @@ public class OpCom {
 		// Create a panel for the two plotters.
 		plotterPanel = new BoxPanel(BoxPanel.VERTICAL);
 		// Create PlotterPanels.
-		measPanel = new PlotterPanel(2, priority);
+		measPanel = new PlotterPanel(3, priority);
 		measPanel.setYAxis(20, -10, 2, 2);
 		measPanel.setXAxis(10, 5, 5);
 		measPanel.setUpdateFreq(1);
-		ctrlPanel = new PlotterPanel(1, priority);
+		ctrlPanel = new PlotterPanel(3, priority);
 		ctrlPanel.setYAxis(20, -10, 2, 2);
 		ctrlPanel.setXAxis(10, 5, 5);
 		ctrlPanel.setUpdateFreq(1);
@@ -80,19 +82,31 @@ public class OpCom {
 		plotterPanel.add(ctrlPanel);
 
 		// Get initial parameters from Regul
-
-		// Create panels for the parameter fields and labels, add labels and fields 
+		
+		
+		slider = new JPanel();
+		JSlider js = new JSlider();
+		js.addChangeListener(regul);
+		js.setOrientation(1);
+		js.setPreferredSize(new Dimension(50,400));
+		slider.add(js);
+		
+		
+		
+		
+		// Create panels for the parameter fields and labels, add labels and
+		// fields
 		innerParPanel = new BoxPanel(BoxPanel.HORIZONTAL);
 		innerParLabelPanel = new JPanel();
-		innerParLabelPanel.setLayout(new GridLayout(0,1));
+		innerParLabelPanel.setLayout(new GridLayout(0, 1));
 		innerParLabelPanel.add(new JLabel("K: "));
 		innerParLabelPanel.add(new JLabel("Ti: "));
 		innerParLabelPanel.add(new JLabel("Tr: "));
 		innerParLabelPanel.add(new JLabel("Beta: "));
 		innerParLabelPanel.add(new JLabel("h: "));
 		innerParFieldPanel = new JPanel();
-		innerParFieldPanel.setLayout(new GridLayout(0,1));
-		innerParFieldPanel.add(innerParKField); 
+		innerParFieldPanel.setLayout(new GridLayout(0, 1));
+		innerParFieldPanel.add(innerParKField);
 		innerParFieldPanel.add(innerParTiField);
 		innerParFieldPanel.add(innerParTrField);
 		innerParFieldPanel.add(innerParBetaField);
@@ -161,11 +175,11 @@ public class OpCom {
 		innerParButtonPanel.addFixed(10);
 		innerParButtonPanel.add(innerApplyButton);
 
-		
-
 		// Create panel for parameter fields, labels and apply buttons
 		parPanel = new BoxPanel(BoxPanel.HORIZONTAL);
 		parPanel.add(innerParButtonPanel);
+		parPanel.addGlue();
+		parPanel.add(slider);
 
 		// Create panel for the radio buttons.
 		buttonPanel = new JPanel();
@@ -225,7 +239,6 @@ public class OpCom {
 			ballModeButton.setSelected(true);
 		}
 
-
 		// Create panel holding everything but the plotters.
 		leftPanel = new JPanel();
 		leftPanel.setLayout(new BorderLayout());
@@ -256,18 +269,18 @@ public class OpCom {
 		// Position the main window at the screen center.
 		Dimension sd = Toolkit.getDefaultToolkit().getScreenSize();
 		Dimension fd = frame.getSize();
-		frame.setLocation((sd.width-fd.width)/2, (sd.height-fd.height)/2);
+		frame.setLocation((sd.width - fd.width) / 2, (sd.height - fd.height) / 2);
 
 		// Make the window visible.
 		frame.setVisible(true);
-		
+
 		isInitialized = true;
 	}
 
 	/** Called by Regul to plot a control signal data point. */
-	public synchronized void putControlDataPoint(DoublePoint dp) {
+	public synchronized void putControlDataPoint(PlotData dp) {
 		if (isInitialized) {
-			ctrlPanel.putData(dp.x, dp.y);
+			ctrlPanel.putData(dp.x, dp.ang, dp.vel, dp.acc);
 		} else {
 			DebugPrint("Note: GUI not yet initialized. Ignoring call to putControlDataPoint().");
 		}
@@ -276,12 +289,12 @@ public class OpCom {
 	/** Called by Regul to plot a measurement data point. */
 	public synchronized void putMeasurementDataPoint(PlotData pd) {
 		if (isInitialized) {
-			measPanel.putData(pd.x, pd.yref, pd.y);
+			measPanel.putData(pd.x, pd.ang, pd.vel, pd.acc);
 		} else {
 			DebugPrint("Note: GUI not yet initialized. Ignoring call to putMeasurementDataPoint().");
 		}
 	}
-	
+
 	private void DebugPrint(String message) {
 		System.out.println(message);
 	}

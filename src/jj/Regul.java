@@ -1,9 +1,13 @@
 package jj;
 
+import javax.swing.JSlider;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 import se.lth.control.DoublePoint;
 import se.lth.control.realtime.*;
 
-public class Regul extends Thread {
+public class Regul extends Thread implements ChangeListener {
 
 	private OpCom opcom;
 	private AnalogIn mainIn;
@@ -13,9 +17,14 @@ public class Regul extends Thread {
 	private double umin = -10.0;
 	private double umax = 10.0;
 	private double starttime;
+	
+	private long time = 50;
 
-	public Regul(OpCom opcom,int pri) {
-		
+	private double power = 0;
+	
+
+	public Regul(OpCom opcom, int pri) {
+
 		this.opcom = opcom;
 
 		try {
@@ -35,46 +44,58 @@ public class Regul extends Thread {
 	public void run() {
 		starttime = System.currentTimeMillis();
 		try {
-			double mAng;
+			double mAng, mVel, mAcc;
 			while (true) {
-				mainOut.set(0);
-				for (int i = 0; i < 20; i++) {
-					mAng = mainIn.get();
-					sendDataToOpCom(mAng,AtV(mAng),0);
-					Thread.sleep(100);
-				}
-				mainOut.set(5);
-				for (int i = 0; i < 17; i++) {
-					mAng = mainIn.get();
-					sendDataToOpCom(mAng,AtV(mAng),0);
-					Thread.sleep(100);
-				}
+				mainOut.set(power);
+				mAng = mainIn.get();
+				mVel = AtV(mAng);
+				mAcc = VtA(mVel);
+				sendDataToOpCom(mAng, mVel, mAcc);
+				Thread.sleep(time);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private double lastA;
-	private double AtV(double ang){
-		double re = (ang-lastA);
+
+	private double AtV(double ang) {
+		double re = 100*(ang - lastA)/time;
 		lastA = ang;
 		return re;
 	}
-	
-	private void sendDataToOpCom(double mAng, double mVel, double u) {
-		double x = (double)(System.currentTimeMillis() - starttime) / 1000.0;
-		DoublePoint dp = new DoublePoint(x,u);
-		PlotData pd = new PlotData(x,mAng,mVel);
-		opcom.putControlDataPoint(dp);
-		opcom.putMeasurementDataPoint(pd);
+
+	private double lastV;
+
+	private double VtA(double vel) {
+		double re = 100*(vel - lastV)/time;
+		lastV = vel;
+		return re;
+	}
+
+	private void sendDataToOpCom(double mAng, double mVel, double mAcc) {
+		double x = (double) (System.currentTimeMillis() - starttime) / 1000.0;
+		PlotData main = new PlotData(x, mAng, mVel, mAcc);
+		PlotData tail = null;
+		opcom.putControlDataPoint(main);
+		opcom.putMeasurementDataPoint(main);
 	}
 
 	public static void main(String[] args) {
 		OpCom opcom = new OpCom(7);
-		Regul regul = new Regul(opcom,8);
+		Regul regul = new Regul(opcom, 8);
+		opcom.setRegul(regul);
 		opcom.initializeGUI();
 		opcom.start();
 		regul.start();
+	}
+
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		Object source = e.getSource();
+		JSlider theJSlider = (JSlider) source;
+		power = theJSlider.getValue() / 5.0 - 10;
+
 	}
 }
