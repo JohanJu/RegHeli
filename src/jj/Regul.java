@@ -85,14 +85,6 @@ public class Regul extends Thread implements ChangeListener {
 		opcom.putMeasurementDataPoint(main);
 	}
 
-	public static void main(String[] args) {
-		OpCom opcom = new OpCom(7);
-		Regul regul = new Regul(opcom, 8);
-		opcom.setRegul(regul);
-		opcom.initializeGUI();
-		opcom.start();
-		regul.start();
-	}
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
@@ -101,5 +93,14 @@ public class Regul extends Thread implements ChangeListener {
 		power = theJSlider.getValue() / 100.0;
 		System.out.println(power);
 
+	}
+	
+	public static void main(String[] args) {
+		OpCom opcom = new OpCom(7);
+		Regul regul = new Regul(opcom, 8);
+		opcom.setRegul(regul);
+		opcom.initializeGUI();
+		opcom.start();
+		regul.start();
 	}
 }
