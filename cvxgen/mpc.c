@@ -34,7 +34,7 @@ void print()
 }
 
 
-#define NUMTESTS 0
+#define NUMTESTS 1000
 int main(int argc, char **argv)
 {
     int num_iters;
@@ -47,13 +47,8 @@ int main(int argc, char **argv)
     setup_indexing();
     load_default_data();
     /* Solve problem instance for the record. */
-    settings.verbose = 1;
-    solve();
-    for (int i = 0; i < 6; ++i)
-    {
-        printf("%f ", params.x_0[i]);
-    }
-    printf("\n%f %f\n", vars.u_0[0],vars.u_0[1]);
+    settings.verbose = 0;
+    num_iters = solve();
 #ifndef ZERO_LIBRARY_MODE
 #if (NUMTESTS > 0)
     /* Now solve multiple problem instances for timing purposes. */
@@ -62,8 +57,14 @@ int main(int argc, char **argv)
     for (i = 0; i < NUMTESTS; i++)
     {
 
+        for (int i = 0; i < 2; ++i)
+        {
+            *vars.u_0 = 100;
+            vars.u_0++;
+        }
+
         solve();
-        
+        // print();
     }
     time = tocq();
     printf("Timed %d solves over %.3f seconds.\n", NUMTESTS, time);
@@ -122,7 +123,6 @@ void load_default_data(void)
     for (int i = 0; i < 12; ++i)
     {
         fscanf (pFile, "%lf", &d);
-        printf("%f \n", d);
         params.B[i] = d;
     }
     fclose (pFile);

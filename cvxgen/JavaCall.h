@@ -9,11 +9,19 @@ extern "C" {
 #endif
 /*
  * Class:     JavaCall
- * Method:    sumAndAverage
- * Signature: ([I)[D
+ * Method:    mpc
+ * Signature: ([D)[D
  */
-JNIEXPORT jdoubleArray JNICALL Java_JavaCall_sumAndAverage
-  (JNIEnv *, jobject, jintArray);
+JNIEXPORT jdoubleArray JNICALL Java_JavaCall_mpc
+  (JNIEnv *, jobject, jdoubleArray);
+
+/*
+ * Class:     JavaCall
+ * Method:    load
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_JavaCall_load
+  (JNIEnv *, jobject);
 
 #ifdef __cplusplus
 }

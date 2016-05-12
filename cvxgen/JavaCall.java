@@ -5,13 +5,22 @@ public class JavaCall {
  
    // Declare a native method sumAndAverage() that receives an int[] and
    //  return a double[2] array with [0] as sum and [1] as average
-   private native double[] sumAndAverage(int[] numbers);
+   private native double[] mpc(double[] numbers);
+   private native void load();
  
    // Test Driver
    public static void main(String args[]) {
-      int[] numbers = {22, 33, 33};
-      double[] results = new JavaCall().sumAndAverage(numbers);
-      System.out.println("In Java, the sum is " + results[0]);
-      System.out.println("In Java, the average is " + results[1]);
+      double[] numbers = {0,0,0,-10,0,0};
+      JavaCall jc = new JavaCall();
+      jc.load();
+      // long start = System.currentTimeMillis();
+      double[] results = jc.mpc(numbers);
+      // for (int i = 0; i < 999; i++) {
+      // 	results = jc.mpc(numbers);
+      // }
+      // start = System.currentTimeMillis()-start;
+      // System.out.println("time " + start);
+      System.out.println("u0 " + results[0]);
+      System.out.println("u1 " + results[1]);
    }
 }

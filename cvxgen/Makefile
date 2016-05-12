@@ -22,9 +22,12 @@ matrix_support.o: solver.h
 ldl.o: solver.h
 util.o: solver.h
 testsolver.o: solver.h
-java:
+java: solver.o matrix_support.o ldl.o util.o
 	javac JavaCall.java
-	gcc -shared -fpic -o libmpc.so -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux JavaCall.c
+	gcc -shared -fpic -o libmpc.so -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux JavaCall.c solver.c matrix_support.c ldl.c util.c
+	java -Djava.library.path=. JavaCall
+run:
+	javac JavaCall.java
 	java -Djava.library.path=. JavaCall
 .PHONY : clean
 clean :
